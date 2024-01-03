@@ -6,6 +6,7 @@ type Response struct {
 	Error   interface{} `json:"error"`
 }
 
+
 type ResponsePagination struct {
 	Data    interface{} `json:"data"`
 	Message string      `json:"message"`

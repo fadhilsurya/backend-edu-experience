@@ -39,7 +39,9 @@ type CandidateCreateRequest struct {
 }
 
 type LoginReq struct {
-	Email       *string `json:"email,omitempty"`
-	MobilePhone *string `json:"mobile_phone,omitempty"`
-	Password    string  `json:"password"`
+	Email       *string  `json:"email"`
+	MobilePhone *string  `json:"mobile_phone"`
+	Password    string   `json:"password"`
+	Latitude    *float64 `json:"latitude,omitempty"`
+	Longitude   *float64 `json:"longitude,omitempty"`
 }

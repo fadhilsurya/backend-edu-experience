@@ -3,6 +3,7 @@ package main
 
 import (
 	"backend-edu-experience/route"
+	"backend-edu-experience/template"
 	"fmt"
 	"log"
 	"os"
@@ -44,17 +45,12 @@ func main() {
 	port := os.Getenv("PORT")
 
 	router.GET("/ping", func(ctx *gin.Context) {
-		type PingResp struct {
-			Data    interface{} `json:"data"`
-			Message string      `json:"message"`
-		}
 
-		resp := PingResp{
+		ctx.JSON(201, template.Response{
 			Data:    nil,
-			Message: "success",
-		}
-
-		ctx.JSON(201, resp)
+			Message: "PONG!!!",
+			Error:   nil,
+		})
 	})
 
 	router.Run(":" + port)

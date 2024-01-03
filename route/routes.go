@@ -23,8 +23,6 @@ func initializeCandidateRoutes(r *gin.Engine, db *gorm.DB) {
 	candidateRoutes.Use(middleware.TokenAuthMiddleware())
 	{
 		candidateRoutes.PUT("/", candidateController.UpdateCandidate)
-		// userRoutes.GET("/:id", userController.GetById)
-		// userRoutes.POST("/", userController.CreateUser)
-
+		candidateRoutes.DELETE("/", candidateController.DeleteCandidate)
 	}
 }

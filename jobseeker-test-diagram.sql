@@ -53,7 +53,7 @@ CREATE TABLE `experience` (
 CREATE TABLE `city` (
   `id` integer PRIMARY KEY,
   `name` integer,
-  `province_id` varchar(255),
+  `province_id` integer,
   `created_at` timestamp NOT NULL DEFAULT (now()),
   `updated_at` timestamp NOT NULL,
   `deleted_at` timestamp
