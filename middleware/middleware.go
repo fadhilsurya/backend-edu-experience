@@ -26,7 +26,6 @@ func GenerateJWT(id uint) (string, error) {
 
 func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get the token from the header
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing token"})
@@ -34,13 +33,19 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Validate the token
+		checkTokenBlacklist := IsTokenRevoked(tokenString)
+		if checkTokenBlacklist {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token Already Revoked"})
+			c.Abort()
+			return
+
+		}
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Check the signing method
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte(os.Getenv("SECRET_KEY_TOKEN")), nil // Use the same secret key used for signing
+			return []byte(os.Getenv("SECRET_KEY_TOKEN")), nil
 		})
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
@@ -48,7 +53,6 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Check if token has expired
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
@@ -63,42 +67,47 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Pass on to the next handler if token is valid
 		c.Next()
 	}
 }
 
 func GetUserIDFromToken(tokenString string) (int, error) {
-	// Parse the token
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Check the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("SECRET_KEY_TOKEN")), nil // Use the same secret key used for signing
+		return []byte(os.Getenv("SECRET_KEY_TOKEN")), nil
 	})
 
 	if err != nil {
 		return 0, err
 	}
 
-	// Check if the token is valid
 	if !token.Valid {
-		return 0, fmt.Errorf("Invalid token")
+		return 0, fmt.Errorf("invalid token")
 	}
 
-	// Access claims and extract user_id
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, fmt.Errorf("Invalid claims")
+		return 0, fmt.Errorf("invalid claims")
 	}
 
 	userIDInt, ok := claims["user_id"].(float64)
 
 	if !ok {
-		return 0, fmt.Errorf("User ID not found or not a valid type")
+		return 0, fmt.Errorf("user ID not found or not a valid type")
 	}
 
 	return int(userIDInt), nil
+}
+
+var tokenBlacklist = make(map[string]bool)
+
+func RevokeToken(token string) {
+	tokenBlacklist[token] = true
+}
+
+func IsTokenRevoked(token string) bool {
+	return tokenBlacklist[token]
 }

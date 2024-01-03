@@ -2,9 +2,12 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Experience struct {
+	gorm.Model
 	CandidateID    uint      `json:"candidate_id,omitempty"`
 	CompanyName    string    `json:"company_name,omitempty"`
 	CompanyAddress string    `json:"company_address,omitempty"`

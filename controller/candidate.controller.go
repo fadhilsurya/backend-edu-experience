@@ -213,6 +213,25 @@ func (cc *CandidateController) Login(c *gin.Context) {
 	c.JSON(200, resp)
 }
 
+func (cc *CandidateController) SignOut(c *gin.Context) {
+	var (
+		resp template.Response
+	)
+
+	token := c.GetHeader("Authorization")
+
+	middleware.RevokeToken(token)
+
+	resp = template.Response{
+		Data:    nil,
+		Error:   nil,
+		Message: "Success - See You Later",
+	}
+
+	c.JSON(200, resp)
+
+}
+
 func (cc *CandidateController) UpdateCandidate(c *gin.Context) {
 	var (
 		newCandidateReq models.CandidateCreateRequest
@@ -230,18 +249,6 @@ func (cc *CandidateController) UpdateCandidate(c *gin.Context) {
 		c.JSON(400, resp)
 		return
 	}
-
-	// getToken := middleware.GetToken(c)
-	// if getToken == nil {
-	// 	resp = template.Response{
-	// 		Data:    nil,
-	// 		Error:   nil,
-	// 		Message: "Bad Request - Token does not exist",
-	// 	}
-
-	// 	c.JSON(400, resp)
-	// 	return
-	// }
 
 	id, err := middleware.GetUserIDFromToken(c.GetHeader("Authorization"))
 	if err != nil {

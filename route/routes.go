@@ -17,11 +17,12 @@ func initializeCandidateRoutes(r *gin.Engine, db *gorm.DB) {
 	candidateRepo := repository.NewCandidateRepository(db)
 	candidateController := controller.NewCandidateController(candidateRepo)
 
-	r.POST("/login", candidateController.Login)
+	r.POST("/signin", candidateController.Login)
 	r.POST("/signup", candidateController.CreateCandidate)
 	candidateRoutes := r.Group("/candidate")
 	candidateRoutes.Use(middleware.TokenAuthMiddleware())
 	{
+		candidateRoutes.POST("/signout", candidateController.SignOut)
 		candidateRoutes.PUT("/", candidateController.UpdateCandidate)
 		candidateRoutes.DELETE("/", candidateController.DeleteCandidate)
 	}
