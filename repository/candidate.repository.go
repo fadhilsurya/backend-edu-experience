@@ -56,6 +56,7 @@ func (c *CandidateRepository) GetById(id int) (*models.Candidate, error) {
 
 func (c *CandidateRepository) UpdateCandidate(ctx context.Context, id int, candidate models.Candidate) error {
 	data, err := c.GetById(id)
+
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func (c *CandidateRepository) UpdateCandidate(ctx context.Context, id int, candi
 		return errors.New("user not found")
 	}
 
-	err = c.DB.Updates(&candidate).Error
+	err = c.DB.Where("id = ?", id).Updates(&candidate).Error
 	if err != nil {
 		return err
 	}

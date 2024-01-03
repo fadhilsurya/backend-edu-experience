@@ -30,3 +30,7 @@ type EducationCreateRequest struct {
 	Flag            bool    `json:"flag"`
 	Role            string  `json:"role"`
 }
+
+func (Education) TableName() string {
+	return "education"
+}

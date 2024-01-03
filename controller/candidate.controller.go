@@ -189,7 +189,6 @@ func (cc *CandidateController) Login(c *gin.Context) {
 	}
 	currentTime := time.Now()
 
-	// update the longitude and latitude if exist and also update login time with current
 	err = cc.CandidateRepository.UpdateCandidate(ctx, int(data.ID), models.Candidate{
 		Longitude: *loginReq.Longitude,
 		Latitude:  *loginReq.Latitude,
@@ -232,19 +231,19 @@ func (cc *CandidateController) UpdateCandidate(c *gin.Context) {
 		return
 	}
 
-	getToken := middleware.GetToken(c)
-	if getToken == nil {
-		resp = template.Response{
-			Data:    nil,
-			Error:   nil,
-			Message: "Bad Request - Token does not exist",
-		}
+	// getToken := middleware.GetToken(c)
+	// if getToken == nil {
+	// 	resp = template.Response{
+	// 		Data:    nil,
+	// 		Error:   nil,
+	// 		Message: "Bad Request - Token does not exist",
+	// 	}
 
-		c.JSON(400, resp)
-		return
-	}
+	// 	c.JSON(400, resp)
+	// 	return
+	// }
 
-	id, err := middleware.GetUserIDFromToken(*getToken)
+	id, err := middleware.GetUserIDFromToken(c.GetHeader("Authorization"))
 	if err != nil {
 		resp = template.Response{
 			Data:    nil,
@@ -321,25 +320,16 @@ func (cc *CandidateController) UpdateCandidate(c *gin.Context) {
 }
 
 func (cc *CandidateController) DeleteCandidate(c *gin.Context) {
-	resp := template.Response{}
 
-	getToken := middleware.GetToken(c)
-	if getToken == nil {
-		resp = template.Response{
-			Data:    nil,
-			Error:   nil,
-			Message: "Bad Request - Token does not exist",
-		}
+	var (
+		resp template.Response
+	)
 
-		c.JSON(400, resp)
-		return
-	}
-
-	id, err := middleware.GetUserIDFromToken(*getToken)
+	id, err := middleware.GetUserIDFromToken(c.GetHeader("Authorization"))
 	if err != nil {
 		resp = template.Response{
 			Data:    nil,
-			Error:   nil,
+			Error:   err,
 			Message: "Internal Server Error",
 		}
 
@@ -351,7 +341,7 @@ func (cc *CandidateController) DeleteCandidate(c *gin.Context) {
 	if err != nil {
 		resp = template.Response{
 			Data:    nil,
-			Error:   nil,
+			Error:   err,
 			Message: "Internal Server Error",
 		}
 
@@ -366,5 +356,4 @@ func (cc *CandidateController) DeleteCandidate(c *gin.Context) {
 	}
 
 	c.JSON(200, resp)
-
 }

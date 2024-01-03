@@ -27,3 +27,7 @@ type ExperienceCreateRequest struct {
 	UntilNow       bool   `json:"until_now"`
 	Flag           bool   `json:"flag"`
 }
+
+func (Experience) TableName() string {
+	return "experience"
+}

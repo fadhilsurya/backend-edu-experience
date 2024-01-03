@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -71,6 +70,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 
 func GetUserIDFromToken(tokenString string) (int, error) {
 	// Parse the token
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Check the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -78,6 +78,7 @@ func GetUserIDFromToken(tokenString string) (int, error) {
 		}
 		return []byte(os.Getenv("SECRET_KEY_TOKEN")), nil // Use the same secret key used for signing
 	})
+
 	if err != nil {
 		return 0, err
 	}
@@ -93,33 +94,11 @@ func GetUserIDFromToken(tokenString string) (int, error) {
 		return 0, fmt.Errorf("Invalid claims")
 	}
 
-	userIDInt, ok := claims["user_id"].(int)
+	userIDInt, ok := claims["user_id"].(float64)
+
 	if !ok {
 		return 0, fmt.Errorf("User ID not found or not a valid type")
 	}
 
-	return userIDInt, nil
-}
-
-func GetToken(c *gin.Context) *string {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		// No Authorization header provided
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing Authorization Header"})
-		return nil
-	}
-
-	// Check if the Authorization header has Bearer token
-	bearerToken := strings.Split(authHeader, " ")
-	if len(bearerToken) != 2 || strings.ToLower(bearerToken[0]) != "bearer" {
-		// Invalid Authorization header format
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid/Malformed Authorization Header"})
-		return nil
-	}
-
-	// Extract the token
-	jwtToken := bearerToken[1]
-
-	return &jwtToken
-
+	return int(userIDInt), nil
 }
