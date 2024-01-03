@@ -2,7 +2,7 @@
 package main
 
 import (
-	"database/sql"
+	"backend-edu-experience/route"
 	"fmt"
 	"log"
 	"os"
@@ -10,17 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-type Todo struct {
-	ID        int    `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
-}
-
 func main() {
-	// load env
-	err := godotenv.Load(".env") // Load environment variables from .env file
+	// load latest env
+
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %s", err)
 		return
@@ -31,59 +28,34 @@ func main() {
 	dbUsername := os.Getenv("DATABASE_USERNAME")
 	dbPass := os.Getenv("DATABASE_PASSWORD")
 	dbname := os.Getenv("DATABASE_NAME")
-	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPass, dbHost, dbPort, dbname)
+	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUsername, dbPass, dbHost, dbPort, dbname)
 
-	fmt.Printf("%s", address)
-	// Connect to the PostgreSQL database
-	db, err := sql.Open("mysql", address)
+	db, err := gorm.Open(mysql.Open(address), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	router := gin.Default()
 
-	// Routes
-	// router.GET("/todos", getTodos(db))
-	// router.GET("/todos/:id", getTodoByID(db))
-	// router.POST("/todos", createTodo(db))
-	// router.PUT("/todos/:id", updateTodo(db))
-	// router.DELETE("/todos/:id", deleteTodo(db))
+	route.InitializeRoutes(router, db)
 
 	// Start the server
 	port := os.Getenv("PORT")
 
-	fmt.Println("halo maria")
+	router.GET("/ping", func(ctx *gin.Context) {
+		type PingResp struct {
+			Data    interface{} `json:"data"`
+			Message string      `json:"message"`
+		}
+
+		resp := PingResp{
+			Data:    nil,
+			Message: "success",
+		}
+
+		ctx.JSON(201, resp)
+	})
+
 	router.Run(":" + port)
 }
-
-// func getTodos(db *sql.DB) gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		rows, err := db.Query("SELECT id, title, completed FROM todo")
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		defer rows.Close()
-
-// 		todos := []Todo{}
-// 		for rows.Next() {
-// 			var todo Todo
-// 			if err := rows.Scan(&todo.ID, &todo.Title, &todo.Completed); err != nil {
-// 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 				return
-// 			}
-// 			todos = append(todos, todo)
-// 		}
-
-// 		c.JSON(http.StatusOK, todos)
-// 	}
-// }
-
-// Define other CRUD handlers (getTodoByID, createTodo, updateTodo, deleteTodo) similarly
