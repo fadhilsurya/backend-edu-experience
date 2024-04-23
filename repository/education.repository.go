@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/getsentry/sentry-go"
 	"gorm.io/gorm"
 )
 
@@ -37,11 +38,13 @@ func (ed *EducationRepository) GetEducation(pageSize, Offset int, filters map[st
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, nil, err
 	}
 
 	total, err := ed.CountEducation(filters)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return nil, nil, err
 	}
 
@@ -66,6 +69,7 @@ func (ed *EducationRepository) CountEducation(filters map[string]interface{}) (*
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 
@@ -88,6 +92,7 @@ func (ed *EducationRepository) GetOneEducation(filters map[string]interface{}) (
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 
@@ -109,6 +114,7 @@ func (ed *EducationRepository) UpdateCandidate(ctx context.Context, id int, educ
 
 	err = ed.DB.Where("id = ?", id).Updates(&education).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -122,6 +128,7 @@ func (ed *EducationRepository) DeleteEducation(id int) error {
 
 	data, err := ed.GetOneEducation(filters)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -131,6 +138,7 @@ func (ed *EducationRepository) DeleteEducation(id int) error {
 
 	err = ed.DB.Where("id = ?", data.ID).Delete(&data).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -140,6 +148,7 @@ func (ed *EducationRepository) DeleteEducation(id int) error {
 func (ed *EducationRepository) BatchInsertEducation(ctx context.Context, edu []models.Education) error {
 	err := ed.DB.WithContext(ctx).Create(edu).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 

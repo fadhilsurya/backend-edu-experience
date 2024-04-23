@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/getsentry/sentry-go"
 	"gorm.io/gorm"
 )
 
@@ -32,6 +33,7 @@ func (c *CandidateRepository) GetById(id int) (*models.Candidate, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 
@@ -51,6 +53,7 @@ func (c *CandidateRepository) UpdateCandidate(ctx context.Context, id int, candi
 
 	err = c.DB.Where("id = ?", id).Updates(&candidate).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -60,6 +63,7 @@ func (c *CandidateRepository) UpdateCandidate(ctx context.Context, id int, candi
 func (c *CandidateRepository) DeleteCandidate(id int) error {
 	data, err := c.GetById(id)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -69,6 +73,7 @@ func (c *CandidateRepository) DeleteCandidate(id int) error {
 
 	err = c.DB.Where("id = ?", data.ID).Delete(&data).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -91,6 +96,7 @@ func (c *CandidateRepository) GetOneCandidate(filters map[string]interface{}) (*
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 

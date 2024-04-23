@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/getsentry/sentry-go"
 	"gorm.io/gorm"
 )
 
@@ -37,11 +38,13 @@ func (exp *ExperienceRepository) GetExperience(pageSize, Offset int, filters map
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, nil, err
 	}
 
 	total, err := exp.CountExperience(filters)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return nil, nil, err
 	}
 
@@ -66,6 +69,7 @@ func (exp *ExperienceRepository) CountExperience(filters map[string]interface{})
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 
@@ -88,6 +92,7 @@ func (exp *ExperienceRepository) GetOneExperience(filters map[string]interface{}
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		sentry.CaptureMessage(err.Error())
 		return nil, err
 	}
 
@@ -100,6 +105,7 @@ func (exp *ExperienceRepository) UpdateExperience(ctx context.Context, id int, e
 
 	data, err := exp.GetOneExperience(filters)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -109,6 +115,7 @@ func (exp *ExperienceRepository) UpdateExperience(ctx context.Context, id int, e
 
 	err = exp.DB.Where("id = ?", id).Updates(&ex).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -122,6 +129,7 @@ func (exp *ExperienceRepository) DeleteExperience(id int) error {
 
 	data, err := exp.GetOneExperience(filters)
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -131,6 +139,7 @@ func (exp *ExperienceRepository) DeleteExperience(id int) error {
 
 	err = exp.DB.Where("id = ?", data.ID).Delete(&data).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 
@@ -140,6 +149,7 @@ func (exp *ExperienceRepository) DeleteExperience(id int) error {
 func (exp *ExperienceRepository) BatchInsertExperience(ctx context.Context, ex []models.Experience) error {
 	err := exp.DB.WithContext(ctx).Create(ex).Error
 	if err != nil {
+		sentry.CaptureMessage(err.Error())
 		return err
 	}
 

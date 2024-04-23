@@ -1,5 +1,5 @@
 CREATE TABLE `candidate` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` serial,
   `fullname` varchar(255),
   `dob` timestamp NOT NULL,
   `latitude` decimal,
@@ -19,7 +19,7 @@ CREATE TABLE `candidate` (
 );
 
 CREATE TABLE `education` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` serial,
   `candidate_id` integer,
   `institution_name` text,
   `major` text,
@@ -35,7 +35,7 @@ CREATE TABLE `education` (
 );
 
 CREATE TABLE `experience` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` serial,
   `candidate_id` integer NOT NULL,
   `company_name` varchar(255) NOT NULL,
   `company_address` text NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE `experience` (
 );
 
 CREATE TABLE `city` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` serial,
   `name` varchar(255),
   `province_id` integer,
   `created_at` timestamp NOT NULL DEFAULT (now()),
@@ -60,7 +60,7 @@ CREATE TABLE `city` (
 );
 
 CREATE TABLE `province` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` serial,
   `name` varchar(255),
   `created_at` timestamp NOT NULL DEFAULT (now()),
   `updated_at` timestamp NOT NULL,

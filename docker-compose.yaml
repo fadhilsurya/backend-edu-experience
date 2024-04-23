@@ -6,15 +6,19 @@ services:
     container_name: my-redis
     ports:
       - "6379:6379"
-  
-  mysql:
-    image: mysql
-    container_name: my-mysql
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: local
-      MYSQL_DATABASE: test-jobseeker
-      MYSQL_USER: local
-      MYSQL_PASSWORD: local
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test-jobseeker
     ports:
-      - "3306:3306"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
